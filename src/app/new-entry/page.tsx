@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -8,22 +8,59 @@ import { generateSecret } from "@/lib/generate-secret"
 import { toast } from "sonner"
 
 export default function NewEntryPage() {
+  const [existingSecret, setExistingSecret] = useState<string | null>(null)
+  const router = useRouter()
+
+  // Check for existing secret in localStorage
+  useEffect(() => {
+    const secret = localStorage.getItem("your_secret")
+    setExistingSecret(secret)
+  }, [])
+
+  const handleRedirect = () => router.push("/")
+
+  if (existingSecret) {
+    return (
+        <div className="container mx-auto py-8 px-4 max-w-md">
+          <Card>
+            <CardHeader>
+              <CardTitle>Existing Entry</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium mb-1">Your Secret Code</h3>
+                <p className="text-2xl font-bold">{existingSecret}</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  This is your existing secret code
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleRedirect} className="w-full">
+                Continue with Existing Secret
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+    )
+  }
+
+  return (
+      <Suspense fallback={<div className="text-center p-8">Loading entry form...</div>}>
+        <LuckParamsHandler />
+      </Suspense>
+  )
+}
+
+function LuckParamsHandler() {
   const [luck, setLuck] = useState<number | null>(null)
   const [secret, setSecret] = useState<string>("")
   const [isValid, setIsValid] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
 
+  // Process URL parameters and generate secret
   useEffect(() => {
-    // Check for existing secret first
-    const existingSecret = localStorage.getItem("your_secret")
-    if (existingSecret) {
-      setSecret(existingSecret)
-      setIsValid(true)
-      return // Exit early if secret exists
-    }
-
-    // Only generate new secret if no existing secret
     const luckParam = searchParams.get("luck")
     if (luckParam) {
       const luckValue = Number.parseInt(luckParam, 10)
@@ -39,12 +76,8 @@ export default function NewEntryPage() {
   }, [searchParams])
 
   const saveSecretAndRedirect = () => {
-    // Only save if new secret was generated
-    if (!localStorage.getItem("your_secret")) {
-      localStorage.setItem("your_secret", secret)
-    }
-
-    toast('Using existing entry!' )
+    localStorage.setItem("your_secret", secret)
+    toast("Saved Entry!")
     router.push("/")
   }
 
@@ -68,40 +101,32 @@ export default function NewEntryPage() {
       <div className="container mx-auto py-8 px-4 max-w-md">
         <Card>
           <CardHeader>
-            <CardTitle>
-              {localStorage.getItem("your_secret") ? "Existing Entry" : "Your Lucky Entry"}
-            </CardTitle>
-            {!localStorage.getItem("your_secret") && (
-                <CardDescription>Your luck factor is {luck}/10</CardDescription>
-            )}
+            <CardTitle>Your Lucky Entry</CardTitle>
+            <CardDescription>Your luck factor is {luck}/10</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <h3 className="text-sm font-medium mb-1">Your Secret Code</h3>
               <p className="text-2xl font-bold">{secret}</p>
               <p className="text-sm text-muted-foreground mt-2">
-                {localStorage.getItem("your_secret")
-                    ? "This is your existing secret code"
-                    : "Keep this code safe! You'll need it to check your results."}
+                Keep this code safe! You&#39;ll need it to check your results.
               </p>
             </div>
 
-            {!localStorage.getItem("your_secret") && (
-                <div className="bg-primary/10 p-4 rounded-md">
-                  <h3 className="font-medium mb-1">Luck Factor: {luck}/10</h3>
-                  <p className="text-sm">
-                    {luck && luck >= 8
-                        ? "High chance of winning!"
-                        : luck && luck >= 5
-                            ? "Good chance of winning!"
-                            : "Luck might be on your side!"}
-                  </p>
-                </div>
-            )}
+            <div className="bg-primary/10 p-4 rounded-md">
+              <h3 className="font-medium mb-1">Luck Factor: {luck}/10</h3>
+              <p className="text-sm">
+                {luck && luck >= 8
+                    ? "High chance of winning!"
+                    : luck && luck >= 5
+                        ? "Good chance of winning!"
+                        : "Luck might be on your side!"}
+              </p>
+            </div>
           </CardContent>
           <CardFooter>
             <Button onClick={saveSecretAndRedirect} className="w-full">
-              {localStorage.getItem("your_secret") ? "Continue with Existing Secret" : "Save Secret & Continue"}
+              Save Secret & Continue
             </Button>
           </CardFooter>
         </Card>

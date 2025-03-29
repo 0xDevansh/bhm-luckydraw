@@ -20,7 +20,7 @@ export default function AddEntryForm({ onSuccess }: AddEntryFormProps) {
   const [entry, setEntry] = useState("")
   const [luck, setLuck] = useState(5) // Default value
   const [loading, setLoading] = useState(false)
-  const [hash, setHash] = useState('')
+  // const [hash, setHash] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,7 +35,7 @@ export default function AddEntryForm({ onSuccess }: AddEntryFormProps) {
     try {
       const salt = bcryptjs.genSaltSync(10)
       const hash = bcryptjs.hashSync(entry, salt)
-      const { data, error } = await supabase.from("entries").insert([{ content: hash, luck }])
+      const { error } = await supabase.from("entries").insert([{ content: hash, luck }])
 
       if (error) throw error
 

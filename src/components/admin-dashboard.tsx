@@ -54,7 +54,7 @@ export default function AdminDashboard() {
 
         setEntries(entries.filter((entry) => entry.id !== id))
         toast('Entry deleted successfully')
-      } catch (err) {
+      } catch {
         toast('Failed to delete entry')
       } finally {
         setDeletingId(null)

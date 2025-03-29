@@ -31,8 +31,12 @@ export default function AdminLoginForm() {
       if (error) throw error
 
       router.refresh()
-    } catch (error: any) {
-      setError(error.message || "An error occurred during login")
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message || "An error occurred during login")
+      } else {
+        setError("An error occurred during login")
+      }
     } finally {
       setLoading(false)
     }

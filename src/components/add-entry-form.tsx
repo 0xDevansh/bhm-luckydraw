@@ -44,7 +44,7 @@ export default function AddEntryForm({ onSuccess }: AddEntryFormProps) {
       setEntry("")
       setLuck(5) // Reset to default
       if (onSuccess) onSuccess()
-    } catch (err) {
+    } catch {
       toast('Failed to add entry')
     } finally {
       setLoading(false)

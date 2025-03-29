@@ -63,7 +63,7 @@ export default function ResultPage() {
       } else {
         setResult(data);
       }
-    } catch (_) {
+    } catch {
       toast("Error: Failed to check result");
     } finally {
       setLoading(false);

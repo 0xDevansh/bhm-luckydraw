@@ -15,6 +15,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import bcrypt from "bcryptjs";
 
 type Result = {
   id: number;
@@ -48,22 +49,37 @@ export default function ResultPage() {
     setResult(null);
 
     try {
-      const { data, error } = await supabase
+      // Fetch all results
+      const { data: allResults, error } = await supabase
           .from("results")
-          .select("*")
-          .eq("content", submittedSecret)
-          .single();
+          .select("*");
 
-      if (error) {
-        if (error.code === "PGRST116") {
-          setNotFound(true);
-        } else {
-          throw error;
-        }
-      } else {
-        setResult(data);
+      if (error) throw error;
+
+      if (!allResults || allResults.length === 0) {
+        setNotFound(true);
+        return;
       }
-    } catch {
+
+      // Compare submitted secret with all stored hashes
+      let matchedEntry: Result | null = null;
+
+      for (const entry of allResults) {
+        const isMatch = await bcrypt.compare(submittedSecret, entry.content);
+        if (isMatch) {
+          matchedEntry = entry;
+          break;
+        }
+      }
+
+      if (matchedEntry) {
+        setResult(matchedEntry);
+      } else {
+        setNotFound(true);
+      }
+
+    } catch (error) {
+      console.error("Error:", error);
       toast("Error: Failed to check result");
     } finally {
       setLoading(false);
@@ -82,7 +98,7 @@ export default function ResultPage() {
         <Card>
           <CardHeader>
             <CardTitle>Enter Your Secret Code</CardTitle>
-            <CardDescription>Check if you&#39;ve won in the lucky draw</CardDescription>
+            <CardDescription>Check if you&#39;re a winner in the lucky draw</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -92,7 +108,6 @@ export default function ResultPage() {
                     id="secret"
                     value={secret}
                     onChange={(e) => setSecret(e.target.value)}
-                    placeholder="e.g. HappyTiger"
                     required
                 />
               </div>
@@ -108,7 +123,7 @@ export default function ResultPage() {
                   <CardContent className="pt-6">
                     <h3 className="text-xl font-bold text-green-600 dark:text-green-400 mb-2">Congratulations!</h3>
                     <p>
-                      You&#39;ve won: <span className="font-bold">{result.content}</span>
+                      You&#39;ve won! Contact 8439304486 or visit the Aravali stall to claim your prize.
                     </p>
                   </CardContent>
                 </Card>

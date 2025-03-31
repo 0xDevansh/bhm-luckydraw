@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import {buttonVariants} from "@/components/ui/button";
+import Link from "next/link";
+import {cn} from "@/lib/utils";
 
 type Entry = {
   id: number;
@@ -56,6 +59,8 @@ export default function HomePage() {
               <p className="text-xl font-bold mt-2">{secret}</p>
             </div>
         )}
+
+      <Link className={cn(buttonVariants({ variant: 'default' }), 'mb-10 block text-center text-lg')} href={'/result'}>Check Result</Link>
 
         {loading ? (
             <p className="text-center">Loading entries...</p>

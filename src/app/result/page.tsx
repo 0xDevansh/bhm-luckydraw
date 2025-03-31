@@ -28,6 +28,7 @@ export default function ResultPage() {
   const [result, setResult] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [notDeclared, setNotDeclared] = useState(false);
 
   // Automatically submit the form if 'your_secret' exists in localStorage
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function ResultPage() {
 
     setLoading(true);
     setNotFound(false);
+    setNotDeclared(false);
     setResult(null);
 
     try {
@@ -57,7 +59,7 @@ export default function ResultPage() {
       if (error) throw error;
 
       if (!allResults || allResults.length === 0) {
-        setNotFound(true);
+        setNotDeclared(true);
         return;
       }
 
@@ -130,10 +132,19 @@ export default function ResultPage() {
             )}
 
             {notFound && (
-                <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200">
+                <Card className="bg-yellow-50 dark:bg-red-900/20 border-red-200">
                   <CardContent className="pt-6">
-                    <h3 className="text-xl font-bold text-yellow-600 dark:text-yellow-400 mb-2">No Result Found</h3>
-                    <p>We couldn&#39;t find any results for this secret code. Please check if you entered it correctly.</p>
+                    <h3 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">You are not the winner...</h3>
+                    <p>This code is not a winner.</p>
+                  </CardContent>
+                </Card>
+            )}
+
+            {notDeclared && (
+                <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200">
+                  <CardContent className="pt-6">
+                    <h3 className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-2">Result not declared yet</h3>
+                    <p>Please check back later when the results are announced.</p>
                   </CardContent>
                 </Card>
             )}

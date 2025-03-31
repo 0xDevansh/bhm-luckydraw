@@ -3,21 +3,20 @@
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import {Button, buttonVariants} from "@/components/ui/button"
 import { generateSecret } from "@/lib/generate-secret"
 import { toast } from "sonner"
+import Link from "next/link";
+import {cn} from "@/lib/utils";
 
 export default function NewEntryPage() {
   const [existingSecret, setExistingSecret] = useState<string | null>(null)
-  const router = useRouter()
 
   // Check for existing secret in localStorage
   useEffect(() => {
     const secret = localStorage.getItem("your_secret")
     setExistingSecret(secret)
   }, [])
-
-  const handleRedirect = () => router.push("/")
 
   if (existingSecret) {
     return (
@@ -36,10 +35,9 @@ export default function NewEntryPage() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button onClick={handleRedirect} className="w-full">
-                Continue with Existing Secret
-              </Button>
+              <Link className={cn(buttonVariants({ variant: 'default' }), 'mb-10 w-full text-center text-lg')} href={'/result'}>Check Result</Link>
             </CardFooter>
+
           </Card>
         </div>
     )
